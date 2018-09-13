@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.reachauto.hkr.cr.persistence.BalanceWalletRepository">
+    <resultMap id="BaseResultMap" type="com.reachauto.hkr.cr.entity.BalanceWalletDO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="balance_type" property="balanceType" jdbcType="SMALLINT"/>
+        <result column="amount" property="amount" jdbcType="DECIMAL"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
+        <result column="remarks" property="remarks" jdbcType="VARCHAR"/>
+        <result column="deleted" property="deleted" jdbcType="BIT"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, user_id, balance_type, `amount`, created_at, created_by,
+        updated_at, updated_by, remarks, deleted
+    </sql>
+
+    <insert id="modifyOrInsertBalance" parameterType="com.reachauto.hkr.cr.entity.BalanceWalletDO">
+        <selectKey keyProperty="count" resultType="int" order="BEFORE">
+            select count(1) from balance_wallet
+            where deleted = 0
+            and user_id = #{userId}
+            and balance_type = #{balanceType}
+        </selectKey>
+        <if test="count > 0">
+            update balance_wallet
+            set `amount` = `amount` + #{change},
+            updated_at = NOW(),
+            updated_by = #{updatedBy}
+            where deleted = 0
+            and user_id = #{userId}
+            and balance_type = #{balanceType}
+        </if>
+        <if test="count==0">
+            insert into balance_wallet(
+            `user_id`,
+            `balance_type`,
+            `amount`,
+
+            `created_at`,
+            `created_by`,
+            `updated_at`,
+            `updated_by`,
+            `remarks`,
+            `deleted`
+            ) values
+            (
+            #{userId,jdbcType=VARCHAR},
+            #{balanceType,jdbcType=VARCHAR},
+            #{change,jdbcType=VARCHAR},
+
+            NOW(),
+            #{createdBy,jdbcType=VARCHAR},
+            NOW(),
+            #{updatedBy,jdbcType=VARCHAR},
+            #{remarks,jdbcType=VARCHAR},
+            0
+            )
+        </if>
+    </insert>
+
+    <select id="getBalanceByUserIdAndBalanceType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM balance_wallet
+        WHERE deleted = 0
+        AND user_id = #{userId}
+        AND balance_type = #{balanceType}
+    </select>
+
+    <select id="getBalanceListByUserIdListAndBalanceType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM balance_wallet
+        WHERE deleted = 0 AND balance_type = #{balanceType} AND user_id IN
+        <foreach collection="userIdList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="totalDepositBalance" resultType="decimal">
+        SELECT
+        sum(amount)
+        FROM balance_wallet
+        WHERE deleted = 0
+        AND balance_type = #{balanceType}
+    </select>
+
+</mapper>

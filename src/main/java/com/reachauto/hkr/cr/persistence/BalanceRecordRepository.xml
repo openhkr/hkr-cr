@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.reachauto.hkr.cr.persistence.BalanceRecordRepository">
+    <resultMap id="BaseResultMap" type="com.reachauto.hkr.cr.entity.BalanceRecordDO">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+        <result column="balance_type" property="balanceType" jdbcType="SMALLINT"/>
+        <result column="change" property="change" jdbcType="DECIMAL"/>
+        <result column="balance_amount" property="balanceAmount" jdbcType="DECIMAL"/>
+        <result column="uuid" property="uuid" jdbcType="VARCHAR"/>
+        <result column="rollback_flag" property="rollbackFlag" jdbcType="BIT"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="created_by" property="createdBy" jdbcType="VARCHAR"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_by" property="updatedBy" jdbcType="VARCHAR"/>
+        <result column="remarks" property="remarks" jdbcType="VARCHAR"/>
+        <result column="deleted" property="deleted" jdbcType="BIT"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, user_id, balance_type, `change`, balance_amount, uuid, rollback_flag, created_at, created_by,
+        updated_at, updated_by, remarks, deleted
+    </sql>
+
+    <select id="getRecordByUuid" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM balance_record
+        WHERE
+        uuid = #{uuid,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="createRecord" parameterType="com.reachauto.hkr.cr.entity.BalanceRecordDO">
+        insert into balance_record (
+        user_id,
+        balance_type,
+        `change`,
+        balance_amount,
+        uuid,
+        created_at,
+        created_by,
+        updated_at,
+        updated_by,
+        remarks)
+        values (
+        #{userId,jdbcType=VARCHAR},
+        #{balanceType,jdbcType=SMALLINT},
+        #{change,jdbcType=DECIMAL},
+        #{balanceAmount,jdbcType=DECIMAL},
+        #{uuid,jdbcType=VARCHAR},
+        NOW(),
+        #{createdBy,jdbcType=VARCHAR},
+        NOW(),
+        #{updatedBy,jdbcType=VARCHAR},
+        #{remarks,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="setHasRollback">
+        UPDATE balance_record
+        SET
+        rollback_flag = 1,
+        updated_at = NOW()
+        WHERE
+        deleted = 0
+        AND
+        id = #{id,jdbcType=BIGINT}
+        AND
+        rollback_flag = 0
+    </update>
+
+    <select id="countBy" resultType="Integer">
+        <include refid="common.count"/>
+        balance_record
+        <where>
+            deleted = 0
+            AND user_id=#{condition.userId}
+            AND balance_type = #{condition.balanceType}
+        </where>
+    </select>
+
+    <select id="findBy" resultType="com.reachauto.hkr.cr.entity.BalanceRecordDO">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM
+        balance_record
+        <where>
+            deleted = 0
+            AND user_id=#{condition.userId}
+            AND balance_type = #{condition.balanceType}
+        </where>
+        <include refid="common.pageAndSort"/>
+    </select>
+
+</mapper>

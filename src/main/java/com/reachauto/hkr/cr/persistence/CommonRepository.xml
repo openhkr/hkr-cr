@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="common">
+    <sql id="pageAndSort">
+        <if test="condition != null">
+            ${condition.orderContent}
+            <if test="condition.offset != null and condition.limit != null">limit #{condition.offset},#{condition.limit}</if>
+        </if>
+    </sql>
+    <sql id="count">
+        SELECT COUNT(1) FROM
+    </sql>
+
+    <sql id="no_del">
+        deleted=0
+    </sql>
+
+    <sql id="del">
+        deleted=1
+    </sql>
+
+    <sql id="sel_id">
+        SELECT id FROM
+    </sql>
+</mapper>

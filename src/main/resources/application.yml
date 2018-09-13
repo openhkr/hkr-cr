@@ -1,0 +1,80 @@
+ribbon:
+  eureka:
+    enabled: true
+  serverListRefreshInterval: 2000
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          strategy: THREAD
+          thread:
+            timeoutInMilliseconds: 6000
+      circuitBreaker:
+        errorThresholdPercentage: 50
+        sleepWindowInMilliseconds: 5000
+        requestVolumeThreshold: 20
+      fallback:
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 20
+      coreSize: 100
+  stream:
+    maxConcurrentConnections: 50
+
+management:
+  security:
+    enabled: false
+
+feign:
+  hystrix:
+    enabled: true
+
+flyway:
+  baselineOnMigrate: true
+  table: hkr_cr_schema_version
+  enabled: true
+
+logging:
+  level:
+    com:
+      reachauto:
+        hkr:
+          cr: DEBUG
+    org:
+      springframework:
+        mvc: DEBUG
+      apache:
+        ibatis: DEBUG
+  file: /opt/hkr-logs/hkr-cr.log
+
+server:
+  port: 9924
+
+#redis
+spring:
+  datasource:
+      driver-class-name: com.mysql.jdbc.Driver
+      type: com.alibaba.druid.pool.xa.DruidXADataSource
+      url: jdbc:mysql://ip:port/rental?useUnicode=true&characterEncoding=utf-8&autoReconnect=true
+      username: username
+      password: password
+  redis:
+    database: 1
+    host: ip
+    port: port
+    password: password
+    pool:
+      max-idle: 8
+      min-idle: 1
+      max-active: 8
+      max-wait: -1
+
+info:
+  version: "@project.version@"
+
+
+
